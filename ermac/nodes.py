@@ -40,7 +40,7 @@ class Object:
             print "    so using %s with arguments %s" % (func, props)
             print "    got value: %s" % value
 
-            self.properties.append([name, value])
+            self.properties.append((name, value))
         
 class Regexp:
     def __init__(self, expr, flags):
@@ -147,7 +147,7 @@ class Var:
             name = binding[0]
             value = mapping[binding[1][0]](binding[1][1])
             print "in var, creating binding with name %s and value %s" % (name, value)
-            self.bindings.append([name, value])
+            self.bindings.append((name, value))
 
             
 class Defun:
