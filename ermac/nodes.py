@@ -2,6 +2,7 @@
 from exceptions import NotImplementedError
 
 def build_statements(statements):
+    print "in build statements"
     new_statements = []
     for statement in statements:
         new_statement = Statement(statement)
@@ -11,22 +12,27 @@ def build_statements(statements):
 class Atom:
     def __init__(self, atom):
         self.atom = atom
+        print "creating atom %s" % atom
 
 class Num:
     def __init__(self, num):
         self.num = num
+        print "creating num %s" % num
 
 class String:
     def __init__(self, string):
         self.string = string
+        print "creating string %s" % string
 
 class Name:
     def __init__(self, name):
         self.name = name
+        print "creating name %s" % name
 
 class Array:
     def __init__(self, elems):
         self.elems = elems
+        print "creating array"
 
 class Object:
     def __init__(self, properties):
@@ -36,10 +42,7 @@ class Object:
             props = prop[1]
             func = mapping[props[0]]
             value = func(*props[1:])
-            print "in object, property %s has value %s" % (name, props)
-            print "    so using %s with arguments %s" % (func, props)
-            print "    got value: %s" % value
-
+            print "adding { %s : %s } to object properties" % (name, value)
             self.properties.append((name, value))
         
 class Regexp:
@@ -52,6 +55,7 @@ class Assign:
         self.op = op
         self.place = place
         self.val = val
+        print "inside Assign(%s, %s, %s)" % (op, place, val)
 
 class Binary:
     def __init__(self, op, lhs, rhs):
@@ -100,6 +104,10 @@ class Function:
         self.name = name
         self.args = args
         self.statements = build_statements(statements)
+        print "creating function: %s with arguments %s" % (name, args)
+        print "    and statements:"
+        for s in self.statements:
+            print "        %s" % s
 
 class New:
     def __init__(self, func, args):
@@ -108,8 +116,10 @@ class New:
 
 class Toplevel:
     def __init__(self, statements):
-        self.raw_statements = statements
-        self.statements = build_statements(self.raw_statements)
+        self.statements = build_statements(statements)
+        print "creating toplevel with statements:"
+        for s in self.statements:
+            print "    %s" % s
             
 class Block:
     def __init__(self, statements):
@@ -120,10 +130,8 @@ class Statement:
         first_arg = form[0]
         rest_args = form[1:]
         form = mapping[first_arg]
-        print "creating %s statements" % len(rest_args)
         self.form = form(*rest_args)
 
-        
 class Label:
     def __init__(self, name, form):
         self.name = name
@@ -134,6 +142,11 @@ class If:
         self.test = test
         self.then = then
         self.els = els
+        print "creating if statement with:"
+        print "    test: %s" % test
+        print "    then: %s" % then
+        print "    else: %s" % els
+
 
 class With:
     def __init__(self, obj, body):
@@ -146,7 +159,7 @@ class Var:
         for binding in bindings:
             name = binding[0]
             value = mapping[binding[1][0]](binding[1][1])
-            print "in var, creating binding with name %s and value %s" % (name, value)
+            print "creating var %s =  %s" % (name, value)
             self.bindings.append((name, value))
 
             
@@ -155,10 +168,12 @@ class Defun:
         self.name = name
         self.args = args
         self.statements = build_statements(statements)
+        print "inside defun"
 
 class Return:
     def __init__(self, value):
         self.value = value
+        print "Return(%s)" % value
 
 class Debugger:
     def __init__(self):
