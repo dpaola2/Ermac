@@ -254,60 +254,108 @@ class Return:
 
 class Debugger:
     def __init__(self):
-        pass
+        print self
+
+    def __str__(self):
+        return "<Debugger>"
 
 class Try:
     def __init__(self, body, catch, final):
         self.body = body
         self.catch = catch
-        self.final = final
+        if final is None:
+            self.final = None
+        else:
+            self.final = final
+        print self
+
+    def __str__(self):
+        return "<Try %s %s %s>" % (self.body, self.catch, self.final)
 
 class Throw:
     def __init__(self, expr):
-        self.expr = expr
+        if expr is None:
+            self.expr = None
+        else:
+            self.expr = evaluate(expr)
+        print self
+
+    def __str__(self):
+        return "<Throw %s>" % self.expr
 
 class Break:
     def __init__(self, label):
         self.label = label
+        print self
 
+    def __str__(self):
+        return "<Break %s>" % self.label
+    
 class Continue:
     def __init__(self, label):
         self.label = label
+        print self
+
+    def __str__(self):
+        return "<Continue %s>" % self.label
 
 class While:
     def __init__(self, cond, body):
-        self.cond = cond
-        self.body = body
+        self.cond = evaluate(cond)
+        self.body = evaluate(body)
+        print self
+
+    def __str__(self):
+        return "<While %s %s>" % (self.cond, self.body)
 
 class Do:
     def __init__(self, cond, body):
-        self.cond = cond
-        self.body = body
+        self.cond = evaluate(cond)
+        self.body = evaluate(body)
+        print self
+
+    def __str__(self):
+        return "<Do %s %s>" % (self.cond, self.body)
 
 class For:
     def __init__(self, init, cond, step, body):
-        self.init = init
-        self.cond = cond
+        self.init = evaluate(init)
+        self.cond = evaluate(cond)
         self.step = step
-        self.body = body
+        self.body = evaluate(body)
+        print self
+
+    def __str__(self):
+        return "<For init: %s cond: %s step: %s body: %s>" % (self.init, self.cond, self.step, self.body)
 
 class ForIn:
     def __init__(self, init, lhs, obj, body):
-        self.init = init
+        self.init = evaluate(init)
         self.lhs = lhs
         self.obj = obj
-        self.body = body
+        self.body = evaluate(body)
+        print self
+
+    def __str__(self):
+        return "<ForIn init: %s lhs: %s obj: %s body: %s>" % (self.init, self.lhs, self.obj, self.body)
 
 class Case:
     def __init__(self, case, body):
         self.case = case
-        self.body = body
+        self.body = evaluate(body)
+        print self
+
+    def __str__(self):
+        return "<Case %s body: %s>" % (self.case, self.body)
 
 class Switch:
     def __init__(self, val, *cases):
-        raise NotImplementError
         self.val = val
-        self.cases = cases 
+        self.cases = cases
+        print self
+
+    def __str__(self):
+        return "<Switch %s %s>" % (self.val, self.cases)
 
 mapping = {
     'atom': Atom,
