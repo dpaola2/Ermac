@@ -15,60 +15,87 @@ def evaluate(form):
     func = mapping[first_arg]
     return mapping[first_arg](*rest_args)
 
-
 class Atom:
     def __init__(self, atom):
         self.atom = atom
-        print "Atom(%s)" % self.atom
+        print self
+        
+    def __str__(self):
+        return "<Atom %s>" % self.atom
 
 class Num:
     def __init__(self, num):
         self.num = num
-        print "Num(%s)" % self.num
+        print self
+        
+    def __str__(self):
+        return "<Num %s>" % self.num
 
 class String:
     def __init__(self, string):
         self.string = string
-        print "String(%s)" % self.string
+        print self
+        
+    def __str__(self):
+        return "<String %s>" % self.string
 
 class Name:
     def __init__(self, name):
         self.name = name
-        print "Name(%s)" % self.name
+        print self
+        
+    def __str__(self):
+        return "<Name %s>" % self.name
 
 class Array:
     def __init__(self, elems):
         self.elems = elems
-        print "Array(%s)" % self.elems
+        print self
+        
+    def __str__(self):
+        return "<Array %s>" % self.elems
 
 class Object:
     def __init__(self, properties):
-        self.properties = []
+        self.properties = {}
         for prop in properties:
             name = prop[0]
             props = prop[1]
             value = evaluate(props)
-            print "adding { %s : %s } to object properties" % (name, value)
-            self.properties.append((name, value))
+            self.properties[name] = value
+        print self
+
+    def __str__(self):
+        return "<Object %s>" % self.properties
         
 class Regexp:
     def __init__(self, expr, flags):
         self.expr = expr
         self.flags = flags
-        print "Regexp(%s)" % (self.expr, self.flags)
+        print self
+
+    def __str__(self):
+        return "<Regexp expr: %s flags: %s>" % (self.expr, self.flags)
 
 class Assign:
     def __init__(self, op, place, val):
         self.op = op
         self.place = place
         self.val = val
-        print "Assign(%s, %s, %s)" % (op, place, val)
+        print self
+
+    def __str__(self):
+        return "<Assign op: %s, place: %s, val: %s>" % (self.op, self.place, self.val)
 
 class Binary:
     def __init__(self, op, lhs, rhs):
         self.op = op
-        self.lhs = lhs
-        self.rhs = rhs
+        self.lhs = evaluate(lhs)
+        self.rhs = evaluate(rhs)
+        print self
+
+    def __str__(self):
+        return "<Binary %s %s %s>" % (self.lhs, self.op, self.rhs)
 
 class UnaryPostfix:
     def __init__(self, op, place):
@@ -114,10 +141,13 @@ class Function:
         for s in statements:
             self.statements.append(evaluate(s))
 
-        print "creating function: %s with arguments %s" % (name, args)
-        print "\t and statements:"
+        print "Function("
+        print "\tname: %s" % self.name
+        print "\targs: %s" % self.args
+        print "\tstatements:"
         for s in self.statements:
             print "\t\t%s" % s
+        print ")"
 
 class New:
     def __init__(self, func, args):
@@ -130,9 +160,11 @@ class Toplevel:
         for s in statements:
             self.statements.append(evaluate(s))
             print "    %s" % s
-        print "creating toplevel with statements:"
+        print "Toplevel("
+        print "\tstatements:"
         for s in self.statements:
-            print "\t %s" % s
+            print "\t\t%s" % s
+        print ")"
 
             
 class Block:
