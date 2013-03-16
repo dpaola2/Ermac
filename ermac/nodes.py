@@ -9,37 +9,37 @@ def build_statements(statements):
     return new_statements
 
 def evaluate(form):
+    print "evaluating %s" % form
     first_arg = form[0]
     rest_args = form[1:]
     func = mapping[first_arg]
-    print "node = %s\t\tfirst_arg = %s\t\trest_args = %s" % (func, first_arg, rest_args)
     return mapping[first_arg](*rest_args)
 
 
 class Atom:
     def __init__(self, atom):
         self.atom = atom
-        print "creating atom %s" % atom
+        print "Atom(%s)" % self.atom
 
 class Num:
     def __init__(self, num):
         self.num = num
-        print "creating num %s" % num
+        print "Num(%s)" % self.num
 
 class String:
     def __init__(self, string):
         self.string = string
-        print "creating string %s" % string
+        print "String(%s)" % self.string
 
 class Name:
     def __init__(self, name):
         self.name = name
-        print "creating name %s" % name
+        print "Name(%s)" % self.name
 
 class Array:
     def __init__(self, elems):
         self.elems = elems
-        print "creating array"
+        print "Array(%s)" % self.elems
 
 class Object:
     def __init__(self, properties):
@@ -55,13 +55,14 @@ class Regexp:
     def __init__(self, expr, flags):
         self.expr = expr
         self.flags = flags
+        print "Regexp(%s)" % (self.expr, self.flags)
 
 class Assign:
     def __init__(self, op, place, val):
         self.op = op
         self.place = place
         self.val = val
-        print "inside Assign(%s, %s, %s)" % (op, place, val)
+        print "Assign(%s, %s, %s)" % (op, place, val)
 
 class Binary:
     def __init__(self, op, lhs, rhs):
@@ -125,10 +126,14 @@ class New:
 
 class Toplevel:
     def __init__(self, statements):
-        self.statements = build_statements(statements)
+        self.statements = []
+        for s in statements:
+            self.statements.append(evaluate(s))
+            print "    %s" % s
         print "creating toplevel with statements:"
         for s in self.statements:
-            print "    %s" % s
+            print "\t %s" % s
+
             
 class Block:
     def __init__(self, statements):
@@ -148,13 +153,16 @@ class Label:
 
 class If:
     def __init__(self, test, then, els):
-        self.test = test
-        self.then = then
-        self.els = els
+        self.test = evaluate(test)
+        self.then = evaluate(then)
+        if els is None:
+            self.els = els
+        else:
+            self.els = evaluate(els)
         print "creating if statement with:"
-        print "    test: %s" % test
-        print "    then: %s" % then
-        print "    else: %s" % els
+        print "    test: %s" % self.test
+        print "    then: %s" % self.then
+        print "    else: %s" % self.els
 
 
 class With:
@@ -181,8 +189,8 @@ class Defun:
 
 class Return:
     def __init__(self, value):
-        self.value = value
-        print "Return(%s)" % value
+        self.value = evaluate(value)
+        print "Return(%s)" % self.value
 
 class Debugger:
     def __init__(self):
