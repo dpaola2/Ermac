@@ -1,20 +1,6 @@
 
 from exceptions import NotImplementedError
 
-def build_statements(statements):
-    print "in build statements"
-    new_statements = []
-    for statement in statements:
-        new_statement = Statement(statement)
-    return new_statements
-
-def evaluate(form):
-    print "evaluating %s" % form
-    first_arg = form[0]
-    rest_args = form[1:]
-    func = mapping[first_arg]
-    return mapping[first_arg](*rest_args)
-
 class Atom:
     def __init__(self, atom):
         self.atom = atom
@@ -95,93 +81,126 @@ class Binary:
         print self
 
     def __str__(self):
-        return "<Binary %s %s %s>" % (self.lhs, self.op, self.rhs)
+        return "<Binary op: %s lhs: %s rhs: %s>" % (self.op, self.lhs, self.rhs)
 
 class UnaryPostfix:
     def __init__(self, op, place):
         self.op = op
         self.place = place
+        print self
+
+    def __str__(self):
+        return "<UnaryPostfix op: %s place: %s>" % (self.op, self.place)
+        
 
 class UnaryPrefix:
     def __init__(self, op, place):
         self.op = op
         self.place = place
+        print self
+
+    def __str__(self):
+        return "<UnaryPrefix op: %s place: %s>" % (self.op, self.place)
 
 class Call:
     def __init__(self, func, args):
         self.func = func
         self.args = args
+        print self
 
+    def __str__(self):
+        return "<Call function: %s args: %s>" % (self.func, self.args)
+        
 class Dot:
     def __init__(self, obj, attr):
         self.obj = obj
         self.attr = attr
+        print self
+
+    def __str__(self):
+        return "<Dot obj: %s attr: %s>" % (self.obj, self.attr)
 
 class Sub:
     def __init__(self, obj, attr):
         self.obj = obj
         self.attr = attr
+        print self
+
+    def __str__(self):
+        return "<Sub obj: %s attr: %s>" % (self.obj, self.attr)
 
 class Seq:
     def __init__(self, form1, result):
         self.form1 = form1
         self.result = result
+        print self
+
+    def __str__(self):
+        return "<Seq form1: %s result: %s>" % (self.form1, self.result)
 
 class Conditional:
     def __init__(self, test, then, els):
-        self.test = test
-        self.then = then
-        self.els = els
+        self.test = evaluate(test)
+        self.then = evaluate(then)
+        if els is None:
+            self.els = None
+        self.els = evaluate(els)
+        print self
+
+    def __str__(self):
+        return "<Conditional %s %s %s>" % (self.test, self.then, self.els)
 
 class Function:
     def __init__(self, name, args, statements):
         self.name = name
-        self.args = args
-        self.statements = []
-        for s in statements:
-            self.statements.append(evaluate(s))
+        self.args = [evaluate(arg) for arg in args]
+        self.statements = [evaluate(s) for s in statements]
+        print self
 
-        print "Function("
-        print "\tname: %s" % self.name
-        print "\targs: %s" % self.args
-        print "\tstatements:"
-        for s in self.statements:
-            print "\t\t%s" % s
-        print ")"
+    def __str__(self):
+        return "<Function name: %s args: %s statements: %s>" % (self.name, self.args, self.statements)
 
 class New:
     def __init__(self, func, args):
         self.func = func
         self.args = args
+        print self
+
+    def __str__(self):
+        return "<New func: %s args: %s>" % (self.func, self.args)
 
 class Toplevel:
     def __init__(self, statements):
-        self.statements = []
-        for s in statements:
-            self.statements.append(evaluate(s))
-            print "    %s" % s
-        print "Toplevel("
-        print "\tstatements:"
-        for s in self.statements:
-            print "\t\t%s" % s
-        print ")"
+        self.statements = [evaluate(s) for s in statements]
+        print self
 
+    def __str__(self):
+        return "<Toplevel %s statements: %s>" % (len(self.statements), self.statements)
             
 class Block:
     def __init__(self, statements):
-        self.statements = build_statements(statements)
+        self.statements = [Statement(s) for s in statements]
+        print self
+
+    def __str__(self):
+        return "<Block %s statements: %s>" % (len(self.statements), self.statements)
 
 class Statement:
     def __init__(self, form):
-        first_arg = form[0]
-        rest_args = form[1:]
-        form = mapping[first_arg]
-        self.form = form(*rest_args)
+        self.form = evaluate(form)
+        print self
+
+    def __str__(self):
+        return "<Statement %s>" % self.form
 
 class Label:
     def __init__(self, name, form):
         self.name = name
         self.form = form
+        print self
+
+    def __str__(self):
+        return "<Label %: %s>" % (self.name, self.form)
 
 class If:
     def __init__(self, test, then, els):
@@ -191,38 +210,47 @@ class If:
             self.els = els
         else:
             self.els = evaluate(els)
-        print "creating if statement with:"
-        print "    test: %s" % self.test
-        print "    then: %s" % self.then
-        print "    else: %s" % self.els
+        print self
 
+    def __str__(self):
+        return "<If %s %s %s>" % (self.test, self.then, self.els)
 
 class With:
     def __init__(self, obj, body):
         self.obj = obj
         self.body = body
+        print self
+
+    def __str__(self):
+        return "<With obj: %s body: %s>" % (self.obj, self.body)
 
 class Var:
     def __init__(self, bindings):
-        self.bindings =[]
+        self.bindings = {}
         for binding in bindings:
             name = binding[0]
-            value = mapping[binding[1][0]](binding[1][1])
-            print "creating var %s =  %s" % (name, value)
-            self.bindings.append((name, value))
+            value = evaluate(binding[1])
+            self.bindings[name] = value
+        print self
+
+    def __str__(self):
+        return "<Var %s>" % self.bindings
 
             
 class Defun:
     def __init__(self, name, args, statements):
         self.name = name
         self.args = args
-        self.statements = build_statements(statements)
+        self.statements = [Statement(s) for s in statements]
         print "inside defun"
 
 class Return:
     def __init__(self, value):
         self.value = evaluate(value)
-        print "Return(%s)" % self.value
+        print self
+
+    def __str__(self):
+        return "<Return %s>" % self.value
 
 class Debugger:
     def __init__(self):
@@ -320,3 +348,10 @@ mapping = {
     'for-in': ForIn,
     'switch': Switch
     }
+
+def evaluate(form):
+    print "------> evaluating %s" % form
+    first_arg = form[0]
+    rest_args = form[1:]
+    func = mapping[first_arg]
+    return mapping[first_arg](*rest_args)
