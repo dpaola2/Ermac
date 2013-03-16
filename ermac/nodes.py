@@ -1,6 +1,13 @@
 
 from exceptions import NotImplementedError
 
+def build_statements(statements):
+    new_statements = []
+    for statement in statements:
+        new_statement = Statement(statement)
+    return new_statements
+
+
 class Atom:
     def __init__(self, atom):
         self.atom = atom
@@ -23,7 +30,17 @@ class Array:
 
 class Object:
     def __init__(self, properties):
-        self.properties = properties
+        self.properties = []
+        for prop in properties:
+            name = prop[0]
+            props = prop[1]
+            func = mapping[props[0]]
+            value = func(*props[1:])
+            print "in object, property %s has value %s" % (name, props)
+            print "    so using %s with arguments %s" % (func, props)
+            print "    got value: %s" % value
+
+            self.properties.append([name, value])
         
 class Regexp:
     def __init__(self, expr, flags):
@@ -79,10 +96,10 @@ class Conditional:
         self.els = els
 
 class Function:
-    def __init__(self, name, args, *statements):
+    def __init__(self, name, args, statements):
         self.name = name
         self.args = args
-        self.statements = statements
+        self.statements = build_statements(statements)
 
 class New:
     def __init__(self, func, args):
@@ -90,17 +107,23 @@ class New:
         self.args = args
 
 class Toplevel:
-    def __init__(self, *statements):
-        self.statements = statements
-
+    def __init__(self, statements):
+        self.raw_statements = statements
+        self.statements = build_statements(self.raw_statements)
+            
 class Block:
-    def __init__(self, *statements):
-        self.statements = statements
+    def __init__(self, statements):
+        self.statements = build_statements(statements)
 
 class Statement:
     def __init__(self, form):
-        self.form = form
+        first_arg = form[0]
+        rest_args = form[1:]
+        form = mapping[first_arg]
+        print "creating %s statements" % len(rest_args)
+        self.form = form(*rest_args)
 
+        
 class Label:
     def __init__(self, name, form):
         self.name = name
@@ -119,13 +142,19 @@ class With:
 
 class Var:
     def __init__(self, bindings):
-        self.bindings = bindings
+        self.bindings =[]
+        for binding in bindings:
+            name = binding[0]
+            value = mapping[binding[1][0]](binding[1][1])
+            print "in var, creating binding with name %s and value %s" % (name, value)
+            self.bindings.append([name, value])
 
+            
 class Defun:
-    def __init__(self, name, args, *statements):
+    def __init__(self, name, args, statements):
         self.name = name
         self.args = args
-        self.statements = statements
+        self.statements = build_statements(statements)
 
 class Return:
     def __init__(self, value):
@@ -187,3 +216,43 @@ class Switch:
         raise NotImplementError
         self.val = val
         self.cases = cases 
+
+mapping = {
+    'atom': Atom,
+    'num': Num,
+    'string': String,
+    'name': Name,
+    'array': Array,
+    'object': Object,
+    'regexp': Regexp,
+    'assign': Assign,
+    'binary': Binary,
+    'unary-postfix': UnaryPostfix,
+    'unary-prefix': UnaryPrefix,
+    'call': Call,
+    'dot': Dot,
+    'sub': Sub,
+    'seq': Seq,
+    'conditional': Conditional,
+    'function': Function,
+    'new': New,
+    'toplevel': Toplevel,
+    'block': Block,
+    'stat': Statement,
+    'label': Label,
+    'if': If,
+    'with': With,
+    'var': Var,
+    'defun': Defun,
+    'return': Return,
+    'debugger': Debugger,
+    'try': Try,
+    'throw': Throw,
+    'break': Break,
+    'continue': Continue,
+    'while': While,
+    'do': Do,
+    'for': For,
+    'for-in': ForIn,
+    'switch': Switch
+    }
