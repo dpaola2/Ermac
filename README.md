@@ -4,6 +4,8 @@ Ermac is an entity composed of legions of dead souls created by Shang Tsung, mos
 
 Ermac is also a byte coded javascript virtual machine.
 
+![ermac](http://i.imgur.com/dF0RLLi.png)
+
 ### References
 
 http://marijnhaverbeke.nl/parse-js/as.txt
