@@ -8,6 +8,13 @@ def build_statements(statements):
         new_statement = Statement(statement)
     return new_statements
 
+def evaluate(form):
+    first_arg = form[0]
+    rest_args = form[1:]
+    func = mapping[first_arg]
+    print "node = %s\t\tfirst_arg = %s\t\trest_args = %s" % (func, first_arg, rest_args)
+    return mapping[first_arg](*rest_args)
+
 
 class Atom:
     def __init__(self, atom):
@@ -40,8 +47,7 @@ class Object:
         for prop in properties:
             name = prop[0]
             props = prop[1]
-            func = mapping[props[0]]
-            value = func(*props[1:])
+            value = evaluate(props)
             print "adding { %s : %s } to object properties" % (name, value)
             self.properties.append((name, value))
         
@@ -103,11 +109,14 @@ class Function:
     def __init__(self, name, args, statements):
         self.name = name
         self.args = args
-        self.statements = build_statements(statements)
+        self.statements = []
+        for s in statements:
+            self.statements.append(evaluate(s))
+
         print "creating function: %s with arguments %s" % (name, args)
-        print "    and statements:"
+        print "\t and statements:"
         for s in self.statements:
-            print "        %s" % s
+            print "\t\t%s" % s
 
 class New:
     def __init__(self, func, args):
