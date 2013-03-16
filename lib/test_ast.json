@@ -28,9 +28,7 @@
                 [
                   "function",
                   null,
-                  [
-
-                  ],
+                  [],
                   [
                     [
                       "if",
@@ -91,6 +89,26 @@
                 ]
               ]
             ]
+          ]
+        ]
+      ]
+    ],
+    [
+      "var",
+      [
+        [
+          "result",
+          [
+            "call",
+            [
+              "dot",
+              [
+                "name",
+                "program"
+              ],
+              "doSomething"
+            ],
+            []
           ]
         ]
       ]
